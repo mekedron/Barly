@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Support for March 2026 Mac models: MacBook Air M5, MacBook Pro M5 Pro/Max
+
+## [1.2.0] - 2026-02-04
+
+### Added
+
 - Sparkle framework for automatic updates
 - DZFoundation dependency for debug logging
 - SwiftFormat configuration and pre-commit hook
