@@ -7,7 +7,7 @@ Barly - macOS status bar management utility
 
 ## Tech Stack
 - **Language**: Swift 6.1
-- **UI Framework**: SwiftUI + AppKit
+- **UI Framework**: AppKit + SwiftUI (views only)
 - **IDE**: Xcode
 - **Platforms**: macOS
 - **Minimum Deployment**: macOS 15.6 (Sequoia)
@@ -114,8 +114,8 @@ Barly/
 ├── src/
 │   ├── Barly.xcodeproj/           # Xcode project
 │   └── Barly/
-│       ├── BarlyApp.swift         # @main entry point
 │       ├── Classes/
+│       │   ├── main.swift             # AppKit entry point
 │       │   ├── AppDelegate.swift
 │       │   ├── Controllers/
 │       │   │   ├── StatusBarController.swift
@@ -156,11 +156,12 @@ Open `src/Barly.xcodeproj` in Xcode to build and run directly.
 
 ## Architecture
 
-Barly is a macOS status bar management app that hides/shows status bar items. It uses SwiftUI with AppKit integration for status bar functionality.
+Barly is a macOS status bar management app that hides/shows status bar items. It uses a native AppKit lifecycle (`main.swift` + `NSApplication`) with SwiftUI for views only (hosted via `NSHostingController`).
 
 ### Core Flow
 
-1. **BarlyApp** (`src/Barly/BarlyApp.swift`) - SwiftUI app entry point using `@NSApplicationDelegateAdaptor` to bridge to AppKit
+1. **main.swift** (`src/Barly/Classes/main.swift`) - Native AppKit entry point, creates `NSApplication` and sets `AppDelegate`
+2. **AppDelegate** (`src/Barly/Classes/AppDelegate.swift`) - Initializes `StatusBarController` and `HotkeyManager` on launch
 2. **AppDelegate** (`src/Barly/Classes/AppDelegate.swift`) - Initializes `StatusBarController` and `HotkeyManager` on launch
 3. **StatusBarController** (`src/Barly/Classes/Controllers/StatusBarController.swift`) - Core logic for the status bar items
 

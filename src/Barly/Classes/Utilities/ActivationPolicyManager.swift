@@ -14,7 +14,6 @@ class ActivationPolicyManager {
     // MARK: - Properties
 
     private var resignActiveObserver: NSObjectProtocol?
-    private var hasActivatedBefore = false
     private var emptyMenu: NSMenu?
 
     private var isActive: Bool {
@@ -36,7 +35,7 @@ class ActivationPolicyManager {
             }
         }
 
-        // Create empty menu to override SwiftUI's default menus
+        // Create minimal menu for full expand mode (only Quit item)
         let mainMenu = NSMenu()
         let appMenuItem = NSMenuItem()
         mainMenu.addItem(appMenuItem)
@@ -63,16 +62,15 @@ class ActivationPolicyManager {
     // MARK: - Private Methods
 
     private func performActivation() {
-        // Set empty menu to override SwiftUI's default menus
+        // Set minimal menu bar for full expand mode
         NSApp.mainMenu = self.emptyMenu
 
-        // Use the newer activation API
+        NSApp.setActivationPolicy(.regular)
         if let frontApp = NSWorkspace.shared.frontmostApplication {
             NSRunningApplication.current.activate(from: frontApp)
         } else {
             NSApp.activate()
         }
-        NSApp.setActivationPolicy(.regular)
     }
 
     // MARK: - Public Methods
@@ -85,17 +83,7 @@ class ActivationPolicyManager {
 
         guard isFullExpandEnabled, !self.isActive else { return }
 
-        if self.hasActivatedBefore {
-            self.performActivation()
-        } else {
-            self.hasActivatedBefore = true
-            // Hack: For first activation, activate the Dock first, then our app
-            // This is needed for proper activation in SwiftUI apps
-            NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock").first?.activate()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
-                self?.performActivation()
-            }
-        }
+        self.performActivation()
     }
 
     /// Deactivates full expand mode.

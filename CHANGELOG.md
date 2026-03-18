@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Migrate from SwiftUI App lifecycle to native AppKit (NSApplication) entry point to eliminate unwanted View, Window, and Help menu bar items injected by SwiftUI
+- Simplify ActivationPolicyManager by removing SwiftUI-specific Dock activation workaround
+
 ### Added
 
 - Support for March 2026 Mac models: MacBook Air M5, MacBook Pro M5 Pro/Max
