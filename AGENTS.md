@@ -107,38 +107,6 @@ SwiftFormat configuration is defined in `.swiftformat` at the project root. This
 - **Menu Bar**: The left side of the top bar showing app menus (App Name, File, Edit, View, etc.)
 - **Status Bar**: The right side of the top bar where icons live (system icons, third-party app icons)
 
-## Project Structure
-
-```
-Barly/
-├── src/
-│   ├── Barly.xcodeproj/           # Xcode project
-│   └── Barly/
-│       ├── Classes/
-│       │   ├── main.swift             # AppKit entry point
-│       │   ├── AppDelegate.swift
-│       │   ├── Controllers/
-│       │   │   ├── StatusBarController.swift
-│       │   │   └── MenuController.swift
-│       │   ├── Models/
-│       │   │   └── Preferences.swift
-│       │   ├── Utilities/
-│       │   │   ├── HotkeyManager.swift
-│       │   │   ├── DisplayModeManager.swift
-│       │   │   ├── ActivationPolicyManager.swift
-│       │   │   └── DeviceInformation.swift
-│       │   └── Views/
-│       │       ├── PreferencesView.swift
-│       │       └── StatusBarMockView.swift
-│       └── Ressources/            # Localization (12 languages)
-├── tools/
-│   └── Clutter/                   # Testing helper app
-├── assets/                        # Icons and design files
-├── AGENTS.md                      # This file
-├── CLAUDE.md -> AGENTS.md         # Symlink
-└── README.md                      # GitHub readme
-```
-
 ## Build Commands
 
 ```bash
