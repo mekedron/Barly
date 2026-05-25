@@ -5,6 +5,7 @@
 //  Created by Dominic Rodemer on 09.12.25.
 //
 
+import Combine
 import SwiftUI
 
 struct PreferencesView: View {
@@ -15,6 +16,15 @@ struct PreferencesView: View {
         .showPreferencesOnLaunch
     @AppStorage(PreferenceKeys.isFullExpandEnabled) private var isFullExpandEnabled = PreferenceDefaults
         .isFullExpandEnabled
+    @AppStorage(PreferenceKeys.showHiddenAppsInMenu) private var showHiddenAppsInMenu = PreferenceDefaults
+        .showHiddenAppsInMenu
+    @AppStorage(PreferenceKeys.allowRightClickHiddenApps) private var allowRightClickHiddenApps = PreferenceDefaults
+        .allowRightClickHiddenApps
+    @AppStorage(PreferenceKeys.hideSeparatorWhenExpanded) private var hideSeparatorWhenExpanded = PreferenceDefaults
+        .hideSeparatorWhenExpanded
+
+    @State private var isAccessibilityTrusted = AccessibilityManager.isTrusted()
+    private let accessibilityPollTimer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -74,7 +84,18 @@ struct PreferencesView: View {
 
                 Toggle("Show this window when starting Barly", isOn: self.$showPreferencesOnLaunch)
                     .font(.system(size: 13))
+
+                Toggle("Hide the separator pipe when expanded (hold \u{2318} to reveal it)", isOn: self.$hideSeparatorWhenExpanded)
+                    .font(.system(size: 13))
+                    .onChange(of: self.hideSeparatorWhenExpanded) { _, _ in
+                        NotificationCenter.default.post(name: .barlySeparatorVisibilityPreferenceChanged, object: nil)
+                    }
             }
+
+            Divider()
+                .padding(.vertical, 14)
+
+            self.hiddenAppsSection
 
             Spacer()
 
@@ -97,7 +118,63 @@ struct PreferencesView: View {
             .padding(.bottom, 20)
         }
         .padding(.horizontal, 20)
-        .frame(width: 640, height: 420)
+        .frame(width: 640, height: 520)
+        .onReceive(self.accessibilityPollTimer) { _ in
+            self.isAccessibilityTrusted = AccessibilityManager.isTrusted()
+        }
+    }
+
+    // MARK: - Hidden Apps Section
+
+    @ViewBuilder
+    private var hiddenAppsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Toggle("Show hidden apps in the context menu", isOn: self.$showHiddenAppsInMenu)
+                .font(.system(size: 13))
+                .onChange(of: self.showHiddenAppsInMenu) { _, isOn in
+                    guard isOn else { return }
+                    if !AccessibilityManager.isTrusted() {
+                        AccessibilityManager.requestTrust()
+                    }
+                    NotificationCenter.default.post(name: .barlyWarmHiddenAppsCache, object: nil)
+                }
+                .onChange(of: self.isAccessibilityTrusted) { _, isTrusted in
+                    if isTrusted, self.showHiddenAppsInMenu {
+                        NotificationCenter.default.post(name: .barlyWarmHiddenAppsCache, object: nil)
+                    }
+                }
+
+            Toggle("Allow right-clicking hidden apps in context menu", isOn: self.$allowRightClickHiddenApps)
+                .font(.system(size: 13))
+                .disabled(!self.showHiddenAppsInMenu)
+
+            Text("When off, hold Option while choosing a hidden app to open its right-click menu.")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.leading, 20)
+
+            HStack(spacing: 8) {
+                Text("Accessibility access:")
+                    .font(.system(size: 13))
+                Text(
+                    self.isAccessibilityTrusted
+                        ? String(localized: "Granted")
+                        : String(localized: "Not granted")
+                )
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(self.isAccessibilityTrusted ? Color.green : Color.red)
+
+                Spacer()
+
+                Button(String(localized: "Open Settings…")) {
+                    self.isAccessibilityTrusted = AccessibilityManager.requestTrust()
+                    AccessibilityManager.openSettings()
+                }
+                .controlSize(.small)
+            }
+            .padding(.top, 4)
+        }
     }
 }
 

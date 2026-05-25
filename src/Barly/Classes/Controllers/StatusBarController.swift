@@ -8,6 +8,10 @@
 import Cocoa
 import Sparkle
 
+extension Notification.Name {
+    static let barlySeparatorVisibilityPreferenceChanged = Notification.Name("BarlySeparatorVisibilityPreferenceChanged")
+}
+
 @MainActor
 class StatusBarController: NSObject {
     // MARK: - Status Bar Items
@@ -23,10 +27,21 @@ class StatusBarController: NSObject {
     private let menuController: MenuController
     private let displayModeManager = DisplayModeManager()
     private let activationPolicyManager = ActivationPolicyManager()
+    private let hiddenAppsScanner = MenuBarExtrasScanner()
     private var autoCollapseTimer: Timer?
+    private var commandKeyPollTimer: Timer?
+    private var lastObservedCommandPressed = false
+    private var separatorPreferenceObserver: NSObjectProtocol?
+    private let commandKeyPollInterval: TimeInterval = 0.05
 
+    private let separatorHiddenLength: CGFloat = 0
     private let separatorVisibleLength: CGFloat = 20
     private let separatorExpandedLength: CGFloat = 10000
+
+    private var hideSeparatorWhenExpanded: Bool {
+        UserDefaults.standard.object(forKey: PreferenceKeys.hideSeparatorWhenExpanded) as? Bool
+            ?? PreferenceDefaults.hideSeparatorWhenExpanded
+    }
 
     private var isCollapsed: Bool {
         self.separatorItem.length == self.separatorExpandedLength
@@ -49,6 +64,8 @@ class StatusBarController: NSObject {
         super.init()
         self.setupUI()
         self.setupDisplayModeManager()
+        self.setupHiddenAppsScanner()
+        self.installSeparatorPreferenceObserver()
 
         // Auto-collapse after 1 second on launch
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
@@ -58,8 +75,31 @@ class StatusBarController: NSObject {
         self.showPreferencesOnLaunchIfNeeded()
     }
 
+    deinit {
+        self.commandKeyPollTimer?.invalidate()
+        if let observer = self.separatorPreferenceObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
     private func setupDisplayModeManager() {
         self.menuController.displayModeManager = self.displayModeManager
+    }
+
+    private func setupHiddenAppsScanner() {
+        self.menuController.hiddenAppsScanner = self.hiddenAppsScanner
+        self.hiddenAppsScanner.expandRequested = { [weak self] in
+            self?.expandStatusBar()
+        }
+        self.hiddenAppsScanner.separatorFrameProvider = { [weak self] in
+            self?.separatorItem.button?.window?.frame
+        }
+
+        let enabled = UserDefaults.standard.object(forKey: PreferenceKeys.showHiddenAppsInMenu) as? Bool
+            ?? PreferenceDefaults.showHiddenAppsInMenu
+        if enabled {
+            self.hiddenAppsScanner.warmCacheInBackground()
+        }
     }
 
     private func setupUI() {
@@ -142,26 +182,48 @@ class StatusBarController: NSObject {
             return
         }
 
+        // Restore the pipe image (it's nil'd while expanded without Command held).
+        self.separatorItem.button?.image = NSImage(named: "seprator")
         self.separatorItem.length = self.separatorExpandedLength
 
         if let button = arrowItem.button {
             button.image = NSImage(named: "expand")
         }
 
+        self.updateCommandKeyPolling()
         self.activationPolicyManager.deactivate()
+
+        // Warm the hidden-apps cache once the bar is actually hiding items:
+        // the scanner short-circuits while the separator is short, so the
+        // init-time warm is effectively a no-op until first collapse.
+        let hiddenAppsEnabled = UserDefaults.standard.object(forKey: PreferenceKeys.showHiddenAppsInMenu) as? Bool
+            ?? PreferenceDefaults.showHiddenAppsInMenu
+        if hiddenAppsEnabled {
+            self.hiddenAppsScanner.warmCacheInBackground()
+        }
     }
 
-    private func expandStatusBar() {
+    func expandStatusBar() {
         guard self.isCollapsed else { return }
 
-        self.separatorItem.length = self.separatorVisibleLength
+        let shouldShow = !self.hideSeparatorWhenExpanded || NSEvent.modifierFlags.contains(.command)
+        self.applySeparatorVisible(shouldShow)
 
         if let button = arrowItem.button {
             button.image = NSImage(named: "collapse")
         }
 
+        self.updateCommandKeyPolling()
         self.activationPolicyManager.activateIfEnabled()
         self.startAutoCollapseTimerIfNeeded()
+    }
+
+    /// Switches the separator between its shown (20px + pipe image) and
+    /// hidden (0px, no image) states while Barly is expanded. The status
+    /// item itself is never removed, so its position is preserved.
+    private func applySeparatorVisible(_ visible: Bool) {
+        self.separatorItem.length = visible ? self.separatorVisibleLength : self.separatorHiddenLength
+        self.separatorItem.button?.image = visible ? NSImage(named: "seprator") : nil
     }
 
     // MARK: - Auto-Collapse Timer
@@ -185,5 +247,68 @@ class StatusBarController: NSObject {
                 self?.collapseStatusBar()
             }
         }
+    }
+
+    // MARK: - Command Key Polling
+
+    /// Polls `NSEvent.modifierFlags` while Barly is expanded with the
+    /// hide-separator preference on. This works without Accessibility access
+    /// (unlike a global `flagsChanged` event monitor, which requires it),
+    /// so the separator can always be revealed by holding ⌘.
+    private func updateCommandKeyPolling() {
+        let shouldPoll = !self.isCollapsed && self.hideSeparatorWhenExpanded
+        if shouldPoll {
+            self.startCommandKeyPolling()
+        } else {
+            self.stopCommandKeyPolling()
+        }
+    }
+
+    private func startCommandKeyPolling() {
+        guard self.commandKeyPollTimer == nil else { return }
+        self.lastObservedCommandPressed = NSEvent.modifierFlags.contains(.command)
+        self.commandKeyPollTimer = Timer.scheduledTimer(
+            withTimeInterval: self.commandKeyPollInterval,
+            repeats: true
+        ) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.pollCommandKey()
+            }
+        }
+    }
+
+    private func stopCommandKeyPolling() {
+        self.commandKeyPollTimer?.invalidate()
+        self.commandKeyPollTimer = nil
+    }
+
+    private func pollCommandKey() {
+        guard !self.isCollapsed, self.hideSeparatorWhenExpanded else {
+            self.stopCommandKeyPolling()
+            return
+        }
+        let commandHeld = NSEvent.modifierFlags.contains(.command)
+        guard commandHeld != self.lastObservedCommandPressed else { return }
+        self.lastObservedCommandPressed = commandHeld
+        self.applySeparatorVisible(commandHeld)
+    }
+
+    private func installSeparatorPreferenceObserver() {
+        self.separatorPreferenceObserver = NotificationCenter.default.addObserver(
+            forName: .barlySeparatorVisibilityPreferenceChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.refreshSeparatorForCurrentState()
+            }
+        }
+    }
+
+    private func refreshSeparatorForCurrentState() {
+        guard !self.isCollapsed else { return }
+        let shouldShow = !self.hideSeparatorWhenExpanded || NSEvent.modifierFlags.contains(.command)
+        self.applySeparatorVisible(shouldShow)
+        self.updateCommandKeyPolling()
     }
 }

@@ -33,8 +33,20 @@
 "Enable auto-collapse" = "Activer le repliement automatique";
 "Fully expand status bar (shows Dock icon temporarily)" = "Étendre complètement la barre d'état (affiche temporairement l'icône du Dock)";
 "Show this window when starting Barly" = "Afficher cette fenêtre au démarrage de Barly";
+"Hide the separator pipe when expanded (hold ⌘ to reveal it)" = "Masquer le séparateur lorsque déployé (maintenez ⌘ pour l'afficher)";
 "Close" = "Fermer";
 
 /* Status Bar Mock */
 "Hidden" = "Masqué";
 "Shown" = "Visible";
+
+/* Hidden Apps */
+"Show hidden apps in the context menu" = "Afficher les apps masquées dans le menu contextuel";
+"Allow right-clicking hidden apps in context menu" = "Autoriser le clic droit sur les apps masquées dans le menu contextuel";
+"When off, hold Option while choosing a hidden app to open its right-click menu." = "Si cette option est désactivée, maintenez Option en choisissant une app masquée pour ouvrir son menu de clic droit.";
+"Accessibility access:" = "Accès aux fonctionnalités d’accessibilité :";
+"Granted" = "Accordé";
+"Not granted" = "Non accordé";
+"Open Settings…" = "Ouvrir Réglages…";
+"Unknown" = "Inconnu";
+"Refresh hidden apps" = "Actualiser les apps masquées";

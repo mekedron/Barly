@@ -33,8 +33,20 @@
 "Enable auto-collapse" = "Automatisch inklappen inschakelen";
 "Fully expand status bar (shows Dock icon temporarily)" = "Statusbalk volledig uitvouwen (toont Dock-pictogram tijdelijk)";
 "Show this window when starting Barly" = "Dit venster tonen bij het starten van Barly";
+"Hide the separator pipe when expanded (hold ⌘ to reveal it)" = "Verberg het scheidingsteken wanneer uitgevouwen (houd ⌘ ingedrukt om het te tonen)";
 "Close" = "Sluit";
 
 /* Status Bar Mock */
 "Hidden" = "Verborgen";
 "Shown" = "Zichtbaar";
+
+/* Hidden Apps */
+"Show hidden apps in the context menu" = "Verborgen apps in het contextmenu tonen";
+"Allow right-clicking hidden apps in context menu" = "Rechtsklikken op verborgen apps in het contextmenu toestaan";
+"When off, hold Option while choosing a hidden app to open its right-click menu." = "Als dit uit staat, houd je Option ingedrukt terwijl je een verborgen app kiest om het rechtsklikmenu te openen.";
+"Accessibility access:" = "Toegankelijkheidstoegang:";
+"Granted" = "Toegestaan";
+"Not granted" = "Niet toegestaan";
+"Open Settings…" = "Instellingen openen…";
+"Unknown" = "Onbekend";
+"Refresh hidden apps" = "Verborgen apps vernieuwen";
