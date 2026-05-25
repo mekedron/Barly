@@ -33,8 +33,20 @@
 "Enable auto-collapse" = "自動折りたたみを有効にする";
 "Fully expand status bar (shows Dock icon temporarily)" = "ステータスバーを完全に展開（Dockアイコンを一時的に表示）";
 "Show this window when starting Barly" = "Barly起動時にこのウィンドウを表示";
+"Hide the separator pipe when expanded (hold ⌘ to reveal it)" = "展開時にセパレーターを非表示にする（⌘を長押しで表示）";
 "Close" = "閉じる";
 
 /* Status Bar Mock */
 "Hidden" = "非表示";
 "Shown" = "表示";
+
+/* Hidden Apps */
+"Show hidden apps in the context menu" = "コンテキストメニューに非表示のアプリを表示";
+"Allow right-clicking hidden apps in context menu" = "コンテキストメニューで非表示のアプリの右クリックを許可";
+"When off, hold Option while choosing a hidden app to open its right-click menu." = "オフの場合は、Optionキーを押しながら非表示のアプリを選択すると、右クリックメニューを開けます。";
+"Accessibility access:" = "アクセシビリティアクセス：";
+"Granted" = "許可済み";
+"Not granted" = "未許可";
+"Open Settings…" = "設定を開く…";
+"Unknown" = "不明";
+"Refresh hidden apps" = "非表示のアプリを更新";

@@ -33,8 +33,20 @@
 "Enable auto-collapse" = "Включить автоматическое сворачивание";
 "Fully expand status bar (shows Dock icon temporarily)" = "Полностью развернуть строку состояния (временно показывает значок в Dock)";
 "Show this window when starting Barly" = "Показывать это окно при запуске Barly";
+"Hide the separator pipe when expanded (hold ⌘ to reveal it)" = "Скрывать разделитель в развёрнутом виде (удерживайте ⌘, чтобы показать)";
 "Close" = "Закрыть";
 
 /* Status Bar Mock */
 "Hidden" = "Скрыто";
 "Shown" = "Видимо";
+
+/* Hidden Apps */
+"Show hidden apps in the context menu" = "Показывать скрытые приложения в контекстном меню";
+"Allow right-clicking hidden apps in context menu" = "Разрешить правый щелчок по скрытым приложениям в контекстном меню";
+"When off, hold Option while choosing a hidden app to open its right-click menu." = "Если выключено, удерживайте Option при выборе скрытого приложения, чтобы открыть его меню правого щелчка.";
+"Accessibility access:" = "Доступ к Универсальному доступу:";
+"Granted" = "Предоставлен";
+"Not granted" = "Не предоставлен";
+"Open Settings…" = "Открыть настройки…";
+"Unknown" = "Неизвестно";
+"Refresh hidden apps" = "Обновить скрытые приложения";

@@ -33,8 +33,20 @@
 "Enable auto-collapse" = "启用自动折叠";
 "Fully expand status bar (shows Dock icon temporarily)" = "完全展开状态栏（临时显示 Dock 图标）";
 "Show this window when starting Barly" = "启动 Barly 时显示此窗口";
+"Hide the separator pipe when expanded (hold ⌘ to reveal it)" = "展开时隐藏分隔符（按住 ⌘ 显示）";
 "Close" = "关闭";
 
 /* Status Bar Mock */
 "Hidden" = "已隐藏";
 "Shown" = "显示中";
+
+/* Hidden Apps */
+"Show hidden apps in the context menu" = "在上下文菜单中显示隐藏 App";
+"Allow right-clicking hidden apps in context menu" = "允许在上下文菜单中右键点按隐藏 App";
+"When off, hold Option while choosing a hidden app to open its right-click menu." = "关闭时，按住 Option 键并选择隐藏 App，即可打开其右键菜单。";
+"Accessibility access:" = "辅助功能访问权限：";
+"Granted" = "已授予";
+"Not granted" = "未授予";
+"Open Settings…" = "打开设置…";
+"Unknown" = "未知";
+"Refresh hidden apps" = "刷新隐藏 App";
